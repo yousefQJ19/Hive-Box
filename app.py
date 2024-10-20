@@ -97,4 +97,9 @@ def readyz():
 
     # Check if conditions for failure are met
     if accessible_senseboxes < required_accessible_boxes:
-        # Check if the cach
+        # Check if the cache is older than CACHE_TIMEOUT
+        cache_age = (datetime.utcnow() - sensebox_cache['timestamp']).total_seconds()
+        if cache_age > CACHE_TIMEOUT:
+            raise HTTPException(status_code=503, detail="More than 50% of senseBoxes are not accessible, and cache is stale.")
+
+    return {"status": "ok"}
