@@ -1,1 +1,3 @@
-# Hive-Box
+# Hivebox
+
+Hivebox project (devops course)
