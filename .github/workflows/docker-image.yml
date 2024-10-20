@@ -1,0 +1,65 @@
+name: Docker Image CI
+
+permissions: read-all
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+# Add step to lint code and Dockerfile.
+# Add step to build the Docker image.
+# Add step to unit tests.
+jobs:
+  lint-docker:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v4
+
+    - name: Lint the Docker image
+      uses: hadolint/hadolint-action@v3.1.0
+
+  lint-code:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Install pylint
+      run: pip install pylint
+
+    - name: Run pylint
+      run: pylint **/*.py
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v4
+
+    - name: Build the docker image
+      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Install pytest
+      run: pip install pytest
+
+    - name: Run pytest
+      run: pytest
