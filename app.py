@@ -7,7 +7,7 @@ from fastapi import FastAPI, HTTPException
 
 app = FastAPI()
 
-VERSION = "v3.2.1"
+VERSION = "v0.0.1"
 CACHE_TIMEOUT = 300  # Cache timeout set to 5 minutes
 
 @app.get("/version")
