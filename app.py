@@ -1,26 +1,23 @@
 """
 This module handles the temperature and readyz endpoints for the API.
 """
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 import requests
-from fastapi import FastAPI,HTTPException
+from fastapi import FastAPI, HTTPException
 
 app = FastAPI()
 
 VERSION = "v3.2.1"
+CACHE_TIMEOUT = 300  # Cache timeout set to 5 minutes
 
-CACHE_TIMEOUT =300  
 @app.get("/version")
 def version() -> str:
-    """
-    returns version
-    """
+    """Returns version"""
     return VERSION
+
 @app.get("/temperature")
 def temperature() -> dict:
-    """
-    Checks the status of the senseBoxes and returns HTTP 200 or 503 based on their availability.
-    """
+    """Fetches temperature data from senseBoxes."""
     result = {"average": 0, "status": ""}
     phenomenon = "temperature"
     date = datetime.now().isoformat() + 'Z'
@@ -29,6 +26,7 @@ def temperature() -> dict:
         f"https://api.opensensemap.org/boxes?date={date}&phenomenon={phenomenon}",
         timeout=1000
     )
+    
     all_boxes = res.json()
     c_count = 0
     c_total = 0
@@ -60,17 +58,13 @@ sensebox_cache = {
     "timestamp": datetime.utcnow() - timedelta(minutes=6),  # Initialize with an old timestamp
     "data": [],
 }
-CACHE_TIMEOUT=300
 SENSEBOX_URL = "https://api.opensensemap.org/boxes"
 
-# Function to check the senseBox status
 def fetch_sensebox_status():
-    """
-        fetch status
-    """
-    global sensebox_cache
-    global CACHE_TIMEOUT
-    # Check if the cache is older than 5 minutes
+    """Fetch status of senseBoxes."""
+    global sensebox_cache  # Use the global cache variable
+
+    # Check if the cache is older than CACHE_TIMEOUT
     current_time = datetime.utcnow()
     if (current_time - sensebox_cache['timestamp']).total_seconds() > CACHE_TIMEOUT:
         try:
@@ -86,29 +80,21 @@ def fetch_sensebox_status():
 
 @app.get("/readyz")
 def readyz():
-    """
-        returns status 200 unless ->
-    """
-    # Fetch senseBox status, using cached data if it's still valid
+    """Returns status 200 unless more than 50% of senseBoxes are not accessible."""
     sensebox_data = fetch_sensebox_status()
 
-    # Get the total number of senseBoxes
     total_senseboxes = len(sensebox_data)
     if total_senseboxes == 0:
-        # If there are no boxes returned, we cannot proceed with checks
         raise HTTPException(status_code=503, detail="No senseBoxes available.")
-    # Count how many senseBoxes are accessible
+
     accessible_senseboxes = 0
     for box in sensebox_data:
         if 'sensors' in box.keys():
             accessible_senseboxes += 1
-    
+
     # Determine if more than 50% + 1 senseBoxes are accessible
     required_accessible_boxes = (total_senseboxes // 2) + 1
+
     # Check if conditions for failure are met
     if accessible_senseboxes < required_accessible_boxes:
-        # Check if the cache is older than 5 minutes
-        cache_age = (datetime.utcnow() - sensebox_cache['timestamp']).total_seconds()
-        if cache_age > CACHE_TIMEOUT:
-            raise HTTPException(status_code=503, detail="More than 50% of senseBoxes are not accessible, and cache is stale.")
-    return {"status": "ok"}
+        # Check if the cach
