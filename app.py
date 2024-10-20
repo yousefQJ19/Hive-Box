@@ -1,3 +1,6 @@
+"""
+This module handles the temperature and readyz endpoints for the API.
+"""
 from datetime import datetime,timedelta
 import requests
 from fastapi import FastAPI,HTTPException
@@ -6,8 +9,12 @@ app = FastAPI()
 
 VERSION = "v3.2.1"
 
+CACHE_TIMEOUT =300  
 @app.get("/version")
 def version() -> str:
+    """
+    Checks the status of the senseBoxes and returns HTTP 200 or 503 based on their availability.
+    """
     return VERSION
 
 @app.get("/temperature")
@@ -20,7 +27,6 @@ def temperature() -> dict:
         f"https://api.opensensemap.org/boxes?date={date}&phenomenon={phenomenon}",
         timeout=1000
     )
-    
     all_boxes = res.json()
     c_count = 0
     c_total = 0
@@ -52,14 +58,13 @@ sensebox_cache = {
     "timestamp": datetime.utcnow() - timedelta(minutes=6),  # Initialize with an old timestamp
     "data": [],
 }
-
-CACHE_TIMEOUT = 300  # 5 minutes (in seconds)
+CACHE_TIMEOUT=300
 SENSEBOX_URL = "https://api.opensensemap.org/boxes"
 
 # Function to check the senseBox status
 def fetch_sensebox_status():
     global sensebox_cache
-
+    global CACHE_TIMEOUT
     # Check if the cache is older than 5 minutes
     current_time = datetime.utcnow()
     if (current_time - sensebox_cache['timestamp']).total_seconds() > CACHE_TIMEOUT:
@@ -101,5 +106,4 @@ def readyz():
         cache_age = (datetime.utcnow() - sensebox_cache['timestamp']).total_seconds()
         if cache_age > CACHE_TIMEOUT:
             raise HTTPException(status_code=503, detail="More than 50% of senseBoxes are not accessible, and cache is stale.")
-
     return {"status": "ok"}
