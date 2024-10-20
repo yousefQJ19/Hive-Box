@@ -26,7 +26,6 @@ def temperature() -> dict:
         f"https://api.opensensemap.org/boxes?date={date}&phenomenon={phenomenon}",
         timeout=1000
     )
-    
     all_boxes = res.json()
     c_count = 0
     c_total = 0
@@ -101,5 +100,4 @@ def readyz():
         cache_age = (datetime.utcnow() - sensebox_cache['timestamp']).total_seconds()
         if cache_age > CACHE_TIMEOUT:
             raise HTTPException(status_code=503, detail="More than 50% of senseBoxes are not accessible, and cache is stale.")
-
     return {"status": "ok"}
