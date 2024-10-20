@@ -53,10 +53,12 @@ def temperature() -> dict:
 
     return result
 
+# Initialize sensebox cache
 sensebox_cache = {
     "timestamp": datetime.utcnow() - timedelta(minutes=6),  # Initialize with an old timestamp
     "data": [],
 }
+
 SENSEBOX_URL = "https://api.opensensemap.org/boxes"
 
 def fetch_sensebox_status():
@@ -100,4 +102,5 @@ def readyz():
         cache_age = (datetime.utcnow() - sensebox_cache['timestamp']).total_seconds()
         if cache_age > CACHE_TIMEOUT:
             raise HTTPException(status_code=503, detail="More than 50% of senseBoxes are not accessible, and cache is stale.")
+    
     return {"status": "ok"}
