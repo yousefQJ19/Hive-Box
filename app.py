@@ -13,12 +13,14 @@ CACHE_TIMEOUT =300
 @app.get("/version")
 def version() -> str:
     """
-    Checks the status of the senseBoxes and returns HTTP 200 or 503 based on their availability.
+    returns version
     """
     return VERSION
-
 @app.get("/temperature")
 def temperature() -> dict:
+    """
+    Checks the status of the senseBoxes and returns HTTP 200 or 503 based on their availability.
+    """
     result = {"average": 0, "status": ""}
     phenomenon = "temperature"
     date = datetime.now().isoformat() + 'Z'
@@ -63,6 +65,9 @@ SENSEBOX_URL = "https://api.opensensemap.org/boxes"
 
 # Function to check the senseBox status
 def fetch_sensebox_status():
+    """
+        fetch status
+    """
     global sensebox_cache
     global CACHE_TIMEOUT
     # Check if the cache is older than 5 minutes
@@ -81,16 +86,17 @@ def fetch_sensebox_status():
 
 @app.get("/readyz")
 def readyz():
+    """
+        returns status 200 unless ->
+    """
     # Fetch senseBox status, using cached data if it's still valid
     sensebox_data = fetch_sensebox_status()
 
     # Get the total number of senseBoxes
     total_senseboxes = len(sensebox_data)
-    
     if total_senseboxes == 0:
         # If there are no boxes returned, we cannot proceed with checks
         raise HTTPException(status_code=503, detail="No senseBoxes available.")
-
     # Count how many senseBoxes are accessible
     accessible_senseboxes = 0
     for box in sensebox_data:
@@ -99,7 +105,6 @@ def readyz():
     
     # Determine if more than 50% + 1 senseBoxes are accessible
     required_accessible_boxes = (total_senseboxes // 2) + 1
-
     # Check if conditions for failure are met
     if accessible_senseboxes < required_accessible_boxes:
         # Check if the cache is older than 5 minutes
