@@ -47,7 +47,7 @@ def temperature() -> dict:
     if result['average'] <= 10:
         result['status'] = "Too cold"
     elif 11 <= result['average'] <= 36:
-        result['status'] = "good"
+        result['status'] = "Good"  # Capitalized for consistency
     else:
         result['status'] = "Too hot"
 
@@ -103,4 +103,4 @@ def readyz():
         if cache_age > CACHE_TIMEOUT:
             raise HTTPException(status_code=503, detail="More than 50% of senseBoxes are not accessible, and cache is stale.")
     
-    return {"status": "ok"}
+    return {"status": "ok"}  # Ensure the return statement is properly formatted
