@@ -60,3 +60,29 @@ jobs:
 
     - name: Run pytest
       run: pytest
+
+
+  version-check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v4
+
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag my-image-name:latest
+
+    - name: Run the container in the background
+      run: docker run -d -p 8000:8000 my-image-name:latest
+
+    - name: Wait for the container to be ready
+      run: sleep 10  # Adjust based on how long the app takes to start
+
+    - name: Test /version endpoint
+      run: |
+        response=$(curl -s http://localhost:8000/version)
+        expected_version="v0.0.1"  # This should match the expected version
+        if [[ "$response" != "$expected_version" ]]; then
+          echo "Version check failed. Expected: $expected_version, but got: $response"
+          exit 1
+        fi
