@@ -101,17 +101,21 @@ def readyz():
             raise HTTPException(status_code=503, detail="More than 50% of senseBoxes are not accessible, and cache is stale.")
     return {"status": "ok"} 
 
+
+
 @app.get("/metrics")
 def metrics() -> Response:
     """Fetch and return the raw response from the API."""
     SENSEBOX_URL = "https://api.opensensemap.org/boxes"
     try:
-        res = requests.get(SENSEBOX_URL, timeout=1000)
+        res = requests.get(SENSEBOX_URL, timeout=10)
         if res.status_code == 200:
-            # Return the raw response from the API
             return Response(content=res.text, media_type="application/json")
         else:
-            return Response(content="Failed to fetch data", media_type="text/plain", status_code=res.status_code)
-    except requests.RequestException as e:
-        # Handle exceptions by returning a plain error message
-        return Response(content=f"Error: {str(e)}", media_type="text/plain", status_code=500)
+            return Response(content=f"Failed to fetch data, status code: {res.status_code}", 
+                            media_type="text/plain", 
+                            status_code=res.status_code)
+    except requests.Timeout:
+        return Response(content="Error: Request timed out", 
+                        media_type="text/plain", 
+                        status_code=504)
