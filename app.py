@@ -3,12 +3,14 @@ This module handles the temperature and readyz endpoints for the API.
 """
 from datetime import datetime, timedelta
 import requests
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException,Response
+
+
 
 app = FastAPI()
 
 VERSION = "v0.0.1"
-CACHE_TIMEOUT = 300  # Cache timeout set to 5 minutes
+CACHE_TIMEOUT = 300  
 
 @app.get("/version")
 def version() -> str:
@@ -47,15 +49,15 @@ def temperature() -> dict:
     if result['average'] <= 10:
         result['status'] = "Too cold"
     elif 11 <= result['average'] <= 36:
-        result['status'] = "Good"  # Capitalized for consistency
+        result['status'] = "Good" 
     else:
         result['status'] = "Too hot"
 
     return result
 
-# Initialize sensebox cache
+
 sensebox_cache = {
-    "timestamp": datetime.utcnow() - timedelta(minutes=6),  # Initialize with an old timestamp
+    "timestamp": datetime.utcnow() - timedelta(minutes=6),  
     "data": [],
 }
 
@@ -63,9 +65,8 @@ SENSEBOX_URL = "https://api.opensensemap.org/boxes"
 
 def fetch_sensebox_status():
     """Fetch status of senseBoxes."""
-    global sensebox_cache  # Use the global cache variable
+    global sensebox_cache  
 
-    # Check if the cache is older than CACHE_TIMEOUT
     current_time = datetime.utcnow()
     if (current_time - sensebox_cache['timestamp']).total_seconds() > CACHE_TIMEOUT:
         try:
@@ -74,7 +75,6 @@ def fetch_sensebox_status():
                 sensebox_cache['data'] = res.json()
                 sensebox_cache['timestamp'] = current_time
         except requests.RequestException:
-            # In case of failure to fetch data, keep the old cache and do not update it
             pass
 
     return sensebox_cache['data']
@@ -93,14 +93,25 @@ def readyz():
         if 'sensors' in box.keys():
             accessible_senseboxes += 1
 
-    # Determine if more than 50% + 1 senseBoxes are accessible
     required_accessible_boxes = (total_senseboxes // 2) + 1
 
-    # Check if conditions for failure are met
     if accessible_senseboxes < required_accessible_boxes:
-        # Check if the cache is older than CACHE_TIMEOUT
         cache_age = (datetime.utcnow() - sensebox_cache['timestamp']).total_seconds()
         if cache_age > CACHE_TIMEOUT:
             raise HTTPException(status_code=503, detail="More than 50% of senseBoxes are not accessible, and cache is stale.")
-    
-    return {"status": "ok"}  # Ensure the return statement is properly formatted
+    return {"status": "ok"} 
+
+@app.get("/metrics")
+def metrics() -> Response:
+    """Fetch and return the raw response from the API."""
+    SENSEBOX_URL = "https://api.opensensemap.org/boxes"
+    try:
+        res = requests.get(SENSEBOX_URL, timeout=1000)
+        if res.status_code == 200:
+            # Return the raw response from the API
+            return Response(content=res.text, media_type="application/json")
+        else:
+            return Response(content="Failed to fetch data", media_type="text/plain", status_code=res.status_code)
+    except requests.RequestException as e:
+        # Handle exceptions by returning a plain error message
+        return Response(content=f"Error: {str(e)}", media_type="text/plain", status_code=500)
