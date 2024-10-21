@@ -73,13 +73,21 @@ jobs:
       run: docker build . --file Dockerfile --tag my-image-name:latest
 
     - name: Run the container in the background
-      run: docker run -d -p 8000:8000 my-image-name:latest
+      run: docker run -d -p 8000:8000 --name my-container my-image-name:latest
 
     - name: Wait for the container to be ready
-      run: sleep 20
+      run: |
+        for i in {1..30}; do
+          if curl -s http://localhost:8000/version; then
+            echo "Service is up!"
+            break
+          fi
+          echo "Waiting for the service to be available..."
+          sleep 2
+        done
 
     - name: Check container logs (optional for debugging)
-      run: docker logs $(docker ps -q --filter ancestor=my-image-name:latest)
+      run: docker logs my-container
 
     - name: Test /version endpoint
       run: |
@@ -89,4 +97,3 @@ jobs:
           echo "Version check failed. Expected: $expected_version, but got: $response"
           exit 1
         fi
-    
