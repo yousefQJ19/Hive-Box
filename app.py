@@ -3,7 +3,8 @@ This module handles the temperature and readyz endpoints for the API.
 """
 from datetime import datetime, timedelta
 import requests
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException,Response
+
 
 
 app = FastAPI()
@@ -101,6 +102,16 @@ def readyz():
     return {"status": "ok"} 
 
 @app.get("/metrics")
-def metrics():
-    """Returns Prometheus metrics."""
-    return Instrumentator().expose(app)
+def metrics() -> Response:
+    """Fetch and return the raw response from the API."""
+    SENSEBOX_URL = "https://api.opensensemap.org/boxes"
+    try:
+        res = requests.get(SENSEBOX_URL, timeout=1000)
+        if res.status_code == 200:
+            # Return the raw response from the API
+            return Response(content=res.text, media_type="application/json")
+        else:
+            return Response(content="Failed to fetch data", media_type="text/plain", status_code=res.status_code)
+    except requests.RequestException as e:
+        # Handle exceptions by returning a plain error message
+        return Response(content=f"Error: {str(e)}", media_type="text/plain", status_code=500)
