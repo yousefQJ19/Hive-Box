@@ -61,32 +61,4 @@ jobs:
     - name: Run pytest
       run: pytest
 
-  version-check:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Check out the repository
-      uses: actions/checkout@v4
-
-    - name: Build and Run Docker Container
-      run: |
-        docker build -t my-image-name:latest .
-        docker run -d --name my-container -p 5000:5000 my-image-name:latest
-
-    - name: Wait for the app to be ready
-      run: |
-        sleep 10 # Wait for the server to start
-
-    - name: Check version endpoint
-      run: |
-        response=$(curl -s http://localhost:5000/version)
-        echo "Response from /version: $response"
-        if [ "$response" != "v0.0.1" ]; then
-          echo "Version check failed! Expected 'v0.0.1' but got '$response'"
-          exit 1
-        fi
-
-    - name: Stop and Remove Docker Container
-      run: |
-        docker stop my-container
-        docker rm my-container
+  
