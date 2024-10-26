@@ -33,9 +33,9 @@ jobs:
           echo "Latest version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV  # Set version using the environment file
       
-          - name: Download Terrascan
-          id: download
-          run: |
+      - name: Download Terrascan
+        id: download
+        run: |
             echo "Downloading Terrascan version $VERSION..."
             DOWNLOAD_URL="https://github.com/tenable/terrascan/releases/download/$VERSION/terrascan_${VERSION}_Windows_x86_64.tar.gz"
         
