@@ -16,15 +16,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get install -y jq unzip  # Install jq and unzip
+      - name: Install jq
+        run: sudo apt-get install jq
 
       - name: Get the latest Terrascan version
         id: get_version
         run: |
           echo "Fetching latest version of Terrascan..."
-          response=$(curl -s -L https://api.github.com/repos/tenable/terrascan/releases/latest)
+          response=$(curl -s -L https://api.github.com/repos/accurics/terrascan/releases/latest)
           echo "Response: $response"  # Debug log
           VERSION=$(echo "$response" | jq -r .tag_name)
           if [ -z "$VERSION" ]; then
@@ -37,25 +36,24 @@ jobs:
       - name: Download Terrascan
         id: download
         run: |
-              echo "Downloading Terrascan version $VERSION..."
-              # Ensure that the URL is correct; adjust as necessary based on the releases page
-              DOWNLOAD_URL="https://github.com/tenable/terrascan/releases/download/v1.19.9/terrascan_v1.19.9_Windows_x86_64.zip"
-              
-              echo "Download URL: $DOWNLOAD_URL"
-              
-              # Download the file with error handling
-              curl -L -f -o terrascan.zip "$DOWNLOAD_URL"
-              
-              # Check if the download was successful
-              if [ $? -ne 0 ]; then
-                echo "Download failed!" >&2
-                exit 1
-              fi
+            echo "Downloading Terrascan version $VERSION..."
+            # Updated download URL for the Windows zip file
+            DOWNLOAD_URL="https://github.com/tenable/terrascan/releases/download/v1.19.9/terrascan_1.19.9_Windows_x86_64.zip"
         
-              # Display the contents of the downloaded ZIP file
-              echo "Downloaded file contents:"
-              unzip -l terrascan.zip | head -n 10
+            echo "Download URL: $DOWNLOAD_URL"
+            
+            # Attempt to download the file
+            curl -L -f -o terrascan.zip "$DOWNLOAD_URL"
         
+            # Check if the download was successful
+            if [ $? -ne 0 ]; then
+              echo "Download failed! The file may not exist." >&2
+              exit 1
+            fi
+        
+            # List contents of the downloaded ZIP file
+            echo "Downloaded file contents:"
+            unzip -l terrascan.zip | head -n 10
 
       - name: Extract and Install Terrascan
         run: |
@@ -63,10 +61,10 @@ jobs:
           # Check if the file exists
           if [[ -f terrascan.zip ]]; then
             echo "File found. Extracting..."
-            unzip terrascan.zip -d /usr/local/bin  # Extract to /usr/local/bin
+            unzip terrascan.zip -d /usr/local/bin
             if [[ $? -eq 0 ]]; then
               echo "Extraction successful."
-              chmod +x /usr/local/bin/terrascan  # Make it executable
+              chmod +x /usr/local/bin/terrascan
               rm terrascan.zip  # Clean up the downloaded file
             else
               echo "Extraction failed." >&2
