@@ -31,10 +31,17 @@ jobs:
         id: download
         run: |
           echo "Downloading Terrascan version ${{ steps.get_version.outputs.version }}..."
-          curl -L "https://github.com/accurics/terrascan/releases/download/${{ steps.get_version.outputs.version }}/terrascan_$(uname -s)_$(uname -m).tar.gz" -o terrascan.tar.gz
-          echo "Download completed. Contents:"
-          ls -l terrascan.tar.gz  # List the downloaded file's details
-          file terrascan.tar.gz  # Check the file type
+          curl -L -o terrascan.tar.gz "https://github.com/accurics/terrascan/releases/download/${{ steps.get_version.outputs.version }}/terrascan_$(uname -s)_$(uname -m).tar.gz"
+          
+          # Check if the download was successful
+          if [ $? -ne 0 ]; then
+            echo "Download failed!"
+            exit 1
+          fi
+
+          # Display the first few lines of the downloaded file
+          echo "Downloaded file contents:"
+          head -n 10 terrascan.tar.gz
 
       - name: Extract and Install Terrascan
         run: |
@@ -45,3 +52,4 @@ jobs:
 
       - name: Run Terrascan
         run: terrascan scan -t k8s -p ./manifests
+
