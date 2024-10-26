@@ -31,7 +31,9 @@ jobs:
         id: download
         run: |
           echo "Downloading Terrascan version ${{ steps.get_version.outputs.version }}..."
-          curl -L -o terrascan.tar.gz "https://github.com/accurics/terrascan/releases/download/${{ steps.get_version.outputs.version }}/terrascan_$(uname -s)_$(uname -m).tar.gz"
+          DOWNLOAD_URL="https://github.com/accurics/terrascan/releases/download/${{ steps.get_version.outputs.version }}/terrascan_$(uname -s)_$(uname -m).tar.gz"
+          echo "Download URL: $DOWNLOAD_URL"
+          curl -L -o terrascan.tar.gz "$DOWNLOAD_URL"
           
           # Check if the download was successful
           if [ $? -ne 0 ]; then
@@ -39,10 +41,7 @@ jobs:
             exit 1
           fi
 
-          # Display the HTTP response code
-          echo "HTTP Response Code: $(curl -s -o /dev/null -w '%{http_code}' "https://github.com/accurics/terrascan/releases/download/${{ steps.get_version.outputs.version }}/terrascan_$(uname -s)_$(uname -m).tar.gz")"
-
-          # Display the first few lines of the downloaded file
+          # Display the first few lines of the downloaded file to debug
           echo "Downloaded file contents:"
           head -n 10 terrascan.tar.gz
 
