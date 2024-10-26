@@ -37,7 +37,8 @@ jobs:
         id: download
         run: |
           echo "Downloading Terrascan version $VERSION..."
-          DOWNLOAD_URL="https://github.com/accurics/terrascan/releases/download/$VERSION/terrascan_$(uname -s)_$(uname -m).tar.gz"
+          DOWNLOAD_URL="https://github.com/tenable/terrascan/releases/download/$VERSION/terrascan_1.19.9_Windows_x86_64.tar.gz_$(uname -s)_$(uname -m).tar.gz"
+                        
           echo "Download URL: $DOWNLOAD_URL"
           curl -L -o terrascan.tar.gz "$DOWNLOAD_URL"
           
