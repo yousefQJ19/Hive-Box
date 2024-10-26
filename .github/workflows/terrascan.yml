@@ -16,13 +16,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install Terrascan
+      - name: Install jq
+        run: sudo apt-get install jq
+
+      - name: Get the latest Terrascan version
+        id: get_version
         run: |
-          # Get the latest version number
+          echo "Fetching latest version of Terrascan..."
           VERSION=$(curl -s https://api.github.com/repos/accurics/terrascan/releases/latest | jq -r .tag_name)
-          
-          # Download and install Terrascan
-          curl -L "https://github.com/accurics/terrascan/releases/download/${VERSION}/terrascan_$(uname -s)_$(uname -m).tar.gz" -o terrascan.tar.gz
+          echo "Latest version: $VERSION"
+          echo "::set-output name=version::$VERSION"
+
+      - name: Download Terrascan
+        id: download
+        run: |
+          echo "Downloading Terrascan version ${{ steps.get_version.outputs.version }}..."
+          curl -L "https://github.com/accurics/terrascan/releases/download/${{ steps.get_version.outputs.version }}/terrascan_$(uname -s)_$(uname -m).tar.gz" -o terrascan.tar.gz
+          echo "Download completed. Contents:"
+          ls -l terrascan.tar.gz  # List the downloaded file's details
+          file terrascan.tar.gz  # Check the file type
+
+      - name: Extract and Install Terrascan
+        run: |
+          echo "Extracting Terrascan..."
           tar -xzf terrascan.tar.gz -C /usr/local/bin
           chmod +x /usr/local/bin/terrascan
           rm terrascan.tar.gz  # Clean up the downloaded file
