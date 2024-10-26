@@ -37,46 +37,39 @@ jobs:
         id: download
         run: |
             echo "Downloading Terrascan version $VERSION..."
-            # Updated download URL for the Windows zip file
-            DOWNLOAD_URL="https://github.com/tenable/terrascan/releases/download/v1.19.9/terrascan_1.19.9_Windows_x86_64.zip"
+            # Update this URL to download the Linux version
+            DOWNLOAD_URL="https://github.com/accurics/terrascan/releases/download/$VERSION/terrascan_${VERSION}_Linux_x86_64.tar.gz"
         
             echo "Download URL: $DOWNLOAD_URL"
             
-            # Attempt to download the file
-            curl -L -f -o terrascan.zip "$DOWNLOAD_URL"
+            # Download the file with error handling
+            curl -L -f -o terrascan.tar.gz "$DOWNLOAD_URL"
         
             # Check if the download was successful
             if [ $? -ne 0 ]; then
-              echo "Download failed! The file may not exist." >&2
+              echo "Download failed!" >&2
               exit 1
             fi
-        
-            # List contents of the downloaded ZIP file
-            echo "Downloaded file contents:"
-            unzip -l terrascan.zip | head -n 10
 
       - name: Extract and Install Terrascan
         run: |
-              echo "Extracting Terrascan..."
-              # Check if the file exists
-              if [[ -f terrascan.zip ]]; then
-                echo "File found. Extracting..."
-                unzip terrascan.zip -d /usr/local/bin
-                if [[ $? -eq 0 ]]; then
-                  echo "Extraction successful."
-                  # Rename the executable for easier access
-                  mv /usr/local/bin/terrascan.exe /usr/local/bin/terrascan
-                  chmod +x /usr/local/bin/terrascan  # Change permissions on the renamed file
-                  rm terrascan.zip  # Clean up the downloaded file
-                else
-                  echo "Extraction failed." >&2
-                  exit 1
-                fi
-              else
-                echo "File terrascan.zip not found." >&2
-                exit 1
-              fi
-          
+          echo "Extracting Terrascan..."
+          # Check if the file exists
+          if [[ -f terrascan.tar.gz ]]; then
+            echo "File found. Extracting..."
+            tar -xzf terrascan.tar.gz -C /usr/local/bin
+            if [[ $? -eq 0 ]]; then
+              echo "Extraction successful."
+              chmod +x /usr/local/bin/terrascan  # Adjust this as needed if the filename is different
+              rm terrascan.tar.gz  # Clean up the downloaded file
+            else
+              echo "Extraction failed." >&2
+              exit 1
+            fi
+          else
+            echo "File terrascan.tar.gz not found." >&2
+            exit 1
+          fi
 
       - name: Run Terrascan
         run: terrascan scan -t k8s -p ./manifests
