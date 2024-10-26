@@ -23,19 +23,21 @@ jobs:
         id: get_version
         run: |
           echo "Fetching latest version of Terrascan..."
-          VERSION=$(curl -s https://api.github.com/repos/accurics/terrascan/releases/latest | jq -r .tag_name)
+          response=$(curl -s https://api.github.com/repos/accurics/terrascan/releases/latest)
+          echo "Response: $response"  # Debug log
+          VERSION=$(echo "$response" | jq -r .tag_name)
           if [ -z "$VERSION" ]; then
             echo "Failed to fetch the latest version." >&2
             exit 1
           fi
           echo "Latest version: $VERSION"
-          echo "::set-output name=version::$VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV  # Set version using the environment file
 
       - name: Download Terrascan
         id: download
         run: |
-          echo "Downloading Terrascan version ${{ steps.get_version.outputs.version }}..."
-          DOWNLOAD_URL="https://github.com/accurics/terrascan/releases/download/${{ steps.get_version.outputs.version }}/terrascan_$(uname -s)_$(uname -m).tar.gz"
+          echo "Downloading Terrascan version $VERSION..."
+          DOWNLOAD_URL="https://github.com/accurics/terrascan/releases/download/$VERSION/terrascan_$(uname -s)_$(uname -m).tar.gz"
           echo "Download URL: $DOWNLOAD_URL"
           curl -L -o terrascan.tar.gz "$DOWNLOAD_URL"
           
