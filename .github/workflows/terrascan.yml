@@ -23,7 +23,7 @@ jobs:
         id: get_version
         run: |
           echo "Fetching latest version of Terrascan..."
-          response=$(curl -s -L https://api.github.com/repos/accurics/terrascan/releases/latest)
+          response=$(curl -s -L https://api.github.com/repos/tenable/terrascan/releases/latest)
           echo "Response: $response"  # Debug log
           VERSION=$(echo "$response" | jq -r .tag_name)
           if [ -z "$VERSION" ]; then
@@ -37,8 +37,8 @@ jobs:
         id: download
         run: |
             echo "Downloading Terrascan version $VERSION..."
-            # Update this URL to download the Linux version
-            DOWNLOAD_URL="https://github.com/accurics/terrascan/releases/download/$VERSION/terrascan_${VERSION}_Linux_x86_64.tar.gz"
+            # Update this URL based on the i386 version
+            DOWNLOAD_URL="https://github.com/tenable/terrascan/releases/download/v1.19.9/terrascan_1.19.9_Linux_i386.tar.gz"
         
             echo "Download URL: $DOWNLOAD_URL"
             
