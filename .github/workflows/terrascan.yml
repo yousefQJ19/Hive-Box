@@ -1,0 +1,23 @@
+name: Terrascan Kubernetes Manifest Scan
+
+on:
+  push:
+    branches:
+      - main  # Run scan on pushes to the main branch
+  pull_request:
+    branches:
+      - main  # Run scan on PRs to the main branch
+
+jobs:
+  terrascan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Run Terrascan
+        uses: accurics/terrascan-action@v1.10.0
+        with:
+          iac_type: 'k8s'  # Specify the IaC type as Kubernetes
+          input_type: 'directory'
+          input_path: './manifests'  # Directory containing your Kubernetes manifests
