@@ -1,26 +1,31 @@
-name: Terrascan Kubernetes Manifest Scan
+name: CI
 
 on:
   push:
     branches:
-      - main  # Run scan on pushes to the main branch
+      - main  # Change this to your main branch
   pull_request:
     branches:
-      - main  # Run scan on PRs to the main branch
+      - main  # Change this to your main branch
 
 jobs:
   terrascan:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.18'  # Use the latest version as needed
 
       - name: Install Terrascan
         run: |
-          curl -L https://github.com/accurics/terrascan/releases/latest/download/terrascan-linux-amd64 -o terrascan
-          chmod +x terrascan
-          sudo mv terrascan /usr/local/bin/terrascan
+          go install github.com/accurics/terrascan/cmd/terrascan@latest
+          echo "::add-path::$(go env GOPATH)/bin"  # Ensure that the installed binary is in PATH
 
       - name: Run Terrascan
-        run: |
-          terrascan scan -t k8s -p ./manifests
+        run: terrascan scan -t k8s -p ./manifests
+
