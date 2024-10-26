@@ -15,9 +15,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Install Terrascan
+        run: |
+          curl -L https://github.com/accurics/terrascan/releases/latest/download/terrascan-linux-amd64 -o terrascan
+          chmod +x terrascan
+          sudo mv terrascan /usr/local/bin/terrascan
+
       - name: Run Terrascan
-        uses: accurics/terrascan-action@v1.10.0
-        with:
-          iac_type: 'k8s'  # Specify the IaC type as Kubernetes
-          input_type: 'directory'
-          input_path: './manifests'  # Directory containing your Kubernetes manifests
+        run: |
+          terrascan scan -t k8s -p ./manifests
