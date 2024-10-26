@@ -37,24 +37,25 @@ jobs:
       - name: Download Terrascan
         id: download
         run: |
-            echo "Downloading Terrascan version $VERSION..."
-            # Update the download URL for the .zip file
-            DOWNLOAD_URL="https://github.com/tenable/terrascan/releases/download/$VERSION/terrascan_${VERSION}_Windows_x86_64.zip"
+              echo "Downloading Terrascan version $VERSION..."
+              # Ensure that the URL is correct; adjust as necessary based on the releases page
+              DOWNLOAD_URL="https://github.com/tenable/terrascan/releases/download/v1.19.9/terrascan_v1.19.9_Windows_x86_64.zip"
+              
+              echo "Download URL: $DOWNLOAD_URL"
+              
+              # Download the file with error handling
+              curl -L -f -o terrascan.zip "$DOWNLOAD_URL"
+              
+              # Check if the download was successful
+              if [ $? -ne 0 ]; then
+                echo "Download failed!" >&2
+                exit 1
+              fi
         
-            echo "Download URL: $DOWNLOAD_URL"
-            
-            # Download the file with error handling
-            curl -L -f -o terrascan.zip "$DOWNLOAD_URL"
+              # Display the contents of the downloaded ZIP file
+              echo "Downloaded file contents:"
+              unzip -l terrascan.zip | head -n 10
         
-            # Check if the download was successful
-            if [ $? -ne 0 ]; then
-              echo "Download failed!" >&2
-              exit 1
-            fi
-        
-            # Display the contents of the downloaded ZIP file
-            echo "Downloaded file contents:"
-            unzip -l terrascan.zip | head -n 10
 
       - name: Extract and Install Terrascan
         run: |
