@@ -57,23 +57,26 @@ jobs:
 
       - name: Extract and Install Terrascan
         run: |
-          echo "Extracting Terrascan..."
-          # Check if the file exists
-          if [[ -f terrascan.zip ]]; then
-            echo "File found. Extracting..."
-            unzip terrascan.zip -d /usr/local/bin
-            if [[ $? -eq 0 ]]; then
-              echo "Extraction successful."
-              chmod +x /usr/local/bin/terrascan
-              rm terrascan.zip  # Clean up the downloaded file
-            else
-              echo "Extraction failed." >&2
-              exit 1
-            fi
-          else
-            echo "File terrascan.zip not found." >&2
-            exit 1
-          fi
+              echo "Extracting Terrascan..."
+              # Check if the file exists
+              if [[ -f terrascan.zip ]]; then
+                echo "File found. Extracting..."
+                unzip terrascan.zip -d /usr/local/bin
+                if [[ $? -eq 0 ]]; then
+                  echo "Extraction successful."
+                  # Rename the executable for easier access
+                  mv /usr/local/bin/terrascan.exe /usr/local/bin/terrascan
+                  chmod +x /usr/local/bin/terrascan  # Change permissions on the renamed file
+                  rm terrascan.zip  # Clean up the downloaded file
+                else
+                  echo "Extraction failed." >&2
+                  exit 1
+                fi
+              else
+                echo "File terrascan.zip not found." >&2
+                exit 1
+              fi
+          
 
       - name: Run Terrascan
         run: terrascan scan -t k8s -p ./manifests
