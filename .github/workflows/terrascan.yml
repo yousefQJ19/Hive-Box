@@ -45,15 +45,25 @@ jobs:
           echo "Downloaded file contents:"
           head -n 10 terrascan.tar.gz
 
-      - name: Extract and Install Terrascan
-        run: |
-          echo "Extracting Terrascan..."
-          # Check the file type before extraction
-          file terrascan.tar.gz
-          tar -xzf terrascan.tar.gz -C /usr/local/bin
-          chmod +x /usr/local/bin/terrascan
-          rm terrascan.tar.gz  # Clean up the downloaded file
-
+          - name: Extract and Install Terrascan
+          run: |
+            echo "Extracting Terrascan..."
+            # Check if the file exists
+            if [[ -f terrascan.tar.gz ]]; then
+              echo "File found. Extracting..."
+              tar -xzf terrascan.tar.gz -C /usr/local/bin
+              if [[ $? -eq 0 ]]; then
+                echo "Extraction successful."
+                chmod +x /usr/local/bin/terrascan
+                rm terrascan.tar.gz  # Clean up the downloaded file
+              else
+                echo "Extraction failed." >&2
+                exit 1
+              fi
+            else
+              echo "File terrascan.tar.gz not found." >&2
+              exit 1
+            fi
       - name: Run Terrascan
         run: terrascan scan -t k8s -p ./manifests
 
