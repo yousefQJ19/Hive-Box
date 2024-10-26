@@ -60,14 +60,5 @@ jobs:
 
     - name: Run pytest
       run: pytest
-  scan:
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout Code
-          uses: actions/checkout@v2
-
-        - name: Run Terrascan
-          uses: docker://accurics/terrascan:latest
-          with:
-            args: scan -t k8s -p ./manifests
+  
   

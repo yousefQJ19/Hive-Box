@@ -9,22 +9,17 @@ on:
       - main  # Change this to your main branch
 
 jobs:
-  terrascan:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: '1.22'  # Ensure a compatible Go version
 
       - name: Install Terrascan
         run: |
-          go install github.com/accurics/terrascan/cmd/terrascan@v1.19.8  # Specify a version
-          echo "::add-path::$(go env GOPATH)/bin"  # Ensure that the installed binary is in PATH
+          curl -L https://github.com/accurics/terrascan/releases/latest/download/terrascan_$(uname -s)_$(uname -m).tar.gz | tar xz -C /usr/local/bin
+          chmod +x /usr/local/bin/terrascan
 
       - name: Run Terrascan
         run: terrascan scan -t k8s -p ./manifests
