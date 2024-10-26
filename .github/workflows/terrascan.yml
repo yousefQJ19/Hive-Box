@@ -72,4 +72,4 @@ jobs:
           fi
 
       - name: Run Terrascan
-        run: terrascan scan -t k8s -p ./manifests
+        run: terrascan scan -t k8s -p ./terraform/manifests
