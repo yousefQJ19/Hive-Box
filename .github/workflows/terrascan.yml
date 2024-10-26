@@ -16,14 +16,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install jq
-        run: sudo apt-get install jq
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -y jq unzip  # Install jq and unzip
 
       - name: Get the latest Terrascan version
         id: get_version
         run: |
           echo "Fetching latest version of Terrascan..."
-          response=$(curl -s -L https://api.github.com/repos/accurics/terrascan/releases/latest)
+          response=$(curl -s -L https://api.github.com/repos/tenable/terrascan/releases/latest)
           echo "Response: $response"  # Debug log
           VERSION=$(echo "$response" | jq -r .tag_name)
           if [ -z "$VERSION" ]; then
@@ -37,16 +38,13 @@ jobs:
         id: download
         run: |
             echo "Downloading Terrascan version $VERSION..."
-            # Update this URL based on what you find on the releases page
-            DOWNLOAD_URL="https://github.com/tenable/terrascan/releases/download/$VERSION/terrascan_${VERSION}_Windows_x86_64.tar.gz"
+            # Update the download URL for the .zip file
+            DOWNLOAD_URL="https://github.com/tenable/terrascan/releases/download/$VERSION/terrascan_${VERSION}_Windows_x86_64.zip"
         
             echo "Download URL: $DOWNLOAD_URL"
             
-            # Check the content type before downloading
-            curl -I "$DOWNLOAD_URL"
-        
             # Download the file with error handling
-            curl -L -f -o terrascan.tar.gz "$DOWNLOAD_URL"
+            curl -L -f -o terrascan.zip "$DOWNLOAD_URL"
         
             # Check if the download was successful
             if [ $? -ne 0 ]; then
@@ -54,27 +52,27 @@ jobs:
               exit 1
             fi
         
-            # Use `tar -tzf` to list the contents of the tar.gz file without extracting
+            # Display the contents of the downloaded ZIP file
             echo "Downloaded file contents:"
-            tar -tzf terrascan.tar.gz | head -n 10
+            unzip -l terrascan.zip | head -n 10
 
       - name: Extract and Install Terrascan
         run: |
           echo "Extracting Terrascan..."
           # Check if the file exists
-          if [[ -f terrascan.tar.gz ]]; then
+          if [[ -f terrascan.zip ]]; then
             echo "File found. Extracting..."
-            tar -xzf terrascan.tar.gz -C /usr/local/bin
+            unzip terrascan.zip -d /usr/local/bin  # Extract to /usr/local/bin
             if [[ $? -eq 0 ]]; then
               echo "Extraction successful."
-              chmod +x /usr/local/bin/terrascan
-              rm terrascan.tar.gz  # Clean up the downloaded file
+              chmod +x /usr/local/bin/terrascan  # Make it executable
+              rm terrascan.zip  # Clean up the downloaded file
             else
               echo "Extraction failed." >&2
               exit 1
             fi
           else
-            echo "File terrascan.tar.gz not found." >&2
+            echo "File terrascan.zip not found." >&2
             exit 1
           fi
 
