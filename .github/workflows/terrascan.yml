@@ -24,6 +24,10 @@ jobs:
         run: |
           echo "Fetching latest version of Terrascan..."
           VERSION=$(curl -s https://api.github.com/repos/accurics/terrascan/releases/latest | jq -r .tag_name)
+          if [ -z "$VERSION" ]; then
+            echo "Failed to fetch the latest version." >&2
+            exit 1
+          fi
           echo "Latest version: $VERSION"
           echo "::set-output name=version::$VERSION"
 
@@ -37,7 +41,7 @@ jobs:
           
           # Check if the download was successful
           if [ $? -ne 0 ]; then
-            echo "Download failed!"
+            echo "Download failed!" >&2
             exit 1
           fi
 
@@ -45,26 +49,25 @@ jobs:
           echo "Downloaded file contents:"
           head -n 10 terrascan.tar.gz
 
-          - name: Extract and Install Terrascan
-          run: |
-            echo "Extracting Terrascan..."
-            # Check if the file exists
-            if [[ -f terrascan.tar.gz ]]; then
-              echo "File found. Extracting..."
-              tar -xzf terrascan.tar.gz -C /usr/local/bin
-              if [[ $? -eq 0 ]]; then
-                echo "Extraction successful."
-                chmod +x /usr/local/bin/terrascan
-                rm terrascan.tar.gz  # Clean up the downloaded file
-              else
-                echo "Extraction failed." >&2
-                exit 1
-              fi
+      - name: Extract and Install Terrascan
+        run: |
+          echo "Extracting Terrascan..."
+          # Check if the file exists
+          if [[ -f terrascan.tar.gz ]]; then
+            echo "File found. Extracting..."
+            tar -xzf terrascan.tar.gz -C /usr/local/bin
+            if [[ $? -eq 0 ]]; then
+              echo "Extraction successful."
+              chmod +x /usr/local/bin/terrascan
+              rm terrascan.tar.gz  # Clean up the downloaded file
             else
-              echo "File terrascan.tar.gz not found." >&2
+              echo "Extraction failed." >&2
               exit 1
             fi
+          else
+            echo "File terrascan.tar.gz not found." >&2
+            exit 1
+          fi
+
       - name: Run Terrascan
         run: terrascan scan -t k8s -p ./manifests
-
-
