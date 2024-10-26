@@ -18,8 +18,14 @@ jobs:
 
       - name: Install Terrascan
         run: |
-          curl -L https://github.com/accurics/terrascan/releases/latest/download/terrascan_$(uname -s)_$(uname -m).tar.gz | tar xz -C /usr/local/bin
+          # Get the latest version number
+          VERSION=$(curl -s https://api.github.com/repos/accurics/terrascan/releases/latest | jq -r .tag_name)
+          
+          # Download and install Terrascan
+          curl -L "https://github.com/accurics/terrascan/releases/download/${VERSION}/terrascan_$(uname -s)_$(uname -m).tar.gz" -o terrascan.tar.gz
+          tar -xzf terrascan.tar.gz -C /usr/local/bin
           chmod +x /usr/local/bin/terrascan
+          rm terrascan.tar.gz  # Clean up the downloaded file
 
       - name: Run Terrascan
         run: terrascan scan -t k8s -p ./manifests
