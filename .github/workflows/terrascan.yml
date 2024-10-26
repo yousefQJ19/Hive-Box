@@ -39,6 +39,9 @@ jobs:
             exit 1
           fi
 
+          # Display the HTTP response code
+          echo "HTTP Response Code: $(curl -s -o /dev/null -w '%{http_code}' "https://github.com/accurics/terrascan/releases/download/${{ steps.get_version.outputs.version }}/terrascan_$(uname -s)_$(uname -m).tar.gz")"
+
           # Display the first few lines of the downloaded file
           echo "Downloaded file contents:"
           head -n 10 terrascan.tar.gz
@@ -46,10 +49,13 @@ jobs:
       - name: Extract and Install Terrascan
         run: |
           echo "Extracting Terrascan..."
+          # Check the file type before extraction
+          file terrascan.tar.gz
           tar -xzf terrascan.tar.gz -C /usr/local/bin
           chmod +x /usr/local/bin/terrascan
           rm terrascan.tar.gz  # Clean up the downloaded file
 
       - name: Run Terrascan
         run: terrascan scan -t k8s -p ./manifests
+
 
