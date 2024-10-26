@@ -33,24 +33,26 @@ jobs:
           echo "Latest version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV  # Set version using the environment file
       
-      - name: Download Terrascan
-        id: download
-        run: |
-          echo "Downloading Terrascan version $VERSION..."
-          DOWNLOAD_URL="https://github.com/tenable/terrascan/releases/download/$VERSION/terrascan_1.19.9_Windows_x86_64.tar.gz_$(uname -s)_$(uname -m).tar.gz"
-                        
-          echo "Download URL: $DOWNLOAD_URL"
-          curl -L -o terrascan.tar.gz "$DOWNLOAD_URL"
-          
-          # Check if the download was successful
-          if [ $? -ne 0 ]; then
-            echo "Download failed!" >&2
-            exit 1
-          fi
-
-          # Display the first few lines of the downloaded file to debug
-          echo "Downloaded file contents:"
-          head -n 10 terrascan.tar.gz
+          - name: Download Terrascan
+          id: download
+          run: |
+            echo "Downloading Terrascan version $VERSION..."
+            DOWNLOAD_URL="https://github.com/tenable/terrascan/releases/download/$VERSION/terrascan_${VERSION}_Windows_x86_64.tar.gz"
+        
+            echo "Download URL: $DOWNLOAD_URL"
+            curl -L -o terrascan.tar.gz "$DOWNLOAD_URL"
+        
+            # Check if the download was successful
+            if [ $? -ne 0 ]; then
+              echo "Download failed!" >&2
+              exit 1
+            fi
+        
+            # Display the first few lines of the downloaded file to debug (not directly applicable for .tar.gz)
+            echo "Downloaded file contents:"
+            # Use `tar -tzf` to list the contents of the tar.gz file without extracting
+            tar -tzf terrascan.tar.gz | head -n 10
+        
 
       - name: Extract and Install Terrascan
         run: |
