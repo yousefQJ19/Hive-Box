@@ -3,10 +3,10 @@ name: CI
 on:
   push:
     branches:
-      - main  # Change this to your main branch
+      - main  
   pull_request:
     branches:
-      - main  # Change this to your main branch
+      - main  
 
 jobs:
   build:
