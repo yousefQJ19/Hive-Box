@@ -57,7 +57,7 @@ jobs:
           # Check if the file exists
           if [[ -f terrascan.tar.gz ]]; then
             echo "File found. Extracting..."
-            tar -xzf terrascan.tar.gz -C /usr/local/bin --strip-components=1
+            tar -xzf terrascan.tar.gz --strip-components=1 -C /usr/local/bin
             if [[ $? -eq 0 ]]; then
               echo "Extraction successful."
               chmod +x /usr/local/bin/terrascan  # Ensure the binary is executable
@@ -72,7 +72,7 @@ jobs:
           fi
 
       - name: Run Terrascan for Kubernetes
-        run: terrascan scan -t k8s -p ./terraform/manifests
+        run: terrascan scan -t k8s -p ./terraform
         
       - name: Run Terrascan for Terraform
         run: terrascan scan -t tf -p ./terraform
