@@ -72,7 +72,7 @@ jobs:
           fi
 
       - name: Run Terrascan for Kubernetes
-        run: terrascan scan -t k8s -p ./terraform
+        run: terrascan scan -t k8s -p ./terraform/manifests
         
       - name: Run Terrascan for Terraform
         run: terrascan scan -t tf -p ./terraform
