@@ -9,7 +9,7 @@ on:
       - main  
 
 jobs:
-  build:
+  terrascan:
     runs-on: ubuntu-latest
 
     steps:

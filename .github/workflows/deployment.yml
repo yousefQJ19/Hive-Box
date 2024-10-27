@@ -1,0 +1,50 @@
+name: CD Pipeline
+
+on:
+  push:
+    branches:
+      - main  # Trigger CD only on changes to the main branch
+  workflow_dispatch:  # Allows manual triggers
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Kubernetes
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Configure kubectl
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG }}
+        run: |
+          echo "$KUBECONFIG" > ~/.kube/config
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: your-docker-username/your-image-name:latest
+          # Set to match your Docker Hub or registry details
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+        env:
+          KUBECONFIG: ~/.kube/config
+
+      - name: Confirm Deployment
+        run: |
+          kubectl rollout status deployment/your-deployment-name
+        env:
+          KUBECONFIG: ~/.kube/config
