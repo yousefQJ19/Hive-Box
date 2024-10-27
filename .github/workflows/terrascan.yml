@@ -22,54 +22,21 @@ jobs:
       - name: Get the latest Terrascan version
         id: get_version
         run: |
-          echo "Fetching latest version of Terrascan..."
           response=$(curl -s -L https://api.github.com/repos/tenable/terrascan/releases/latest)
-          echo "Response: $response"  # Debug log
           VERSION=$(echo "$response" | jq -r .tag_name)
-          if [ -z "$VERSION" ]; then
-            echo "Failed to fetch the latest version." >&2
-            exit 1
-          fi
-          echo "Latest version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV  # Set version using the environment file
       
       - name: Download Terrascan
         id: download
         run: |
-            echo "Downloading Terrascan version $VERSION..."
-            # Update this URL based on the i386 version
-            DOWNLOAD_URL="https://github.com/tenable/terrascan/releases/download/v1.19.9/terrascan_1.19.9_Linux_i386.tar.gz"
-        
-            echo "Download URL: $DOWNLOAD_URL"
-            
-            # Download the file with error handling
-            curl -L -f -o terrascan.tar.gz "$DOWNLOAD_URL"
-        
-            # Check if the download was successful
-            if [ $? -ne 0 ]; then
-              echo "Download failed!" >&2
-              exit 1
-            fi
+          DOWNLOAD_URL="https://github.com/tenable/terrascan/releases/download/$VERSION/terrascan_$VERSION_Linux_i386.tar.gz"
+          curl -L -f -o terrascan.tar.gz "$DOWNLOAD_URL"
 
       - name: Extract and Install Terrascan
         run: |
-          echo "Extracting Terrascan..."
-          # Check if the file exists
-          if [[ -f terrascan.tar.gz ]]; then
-            echo "File found. Extracting..."
-            tar -xzf terrascan.tar.gz -C /usr/local/bin
-            if [[ $? -eq 0 ]]; then
-              echo "Extraction successful."
-              chmod +x /usr/local/bin/terrascan  # Adjust this as needed if the filename is different
-              rm terrascan.tar.gz  # Clean up the downloaded file
-            else
-              echo "Extraction failed." >&2
-              exit 1
-            fi
-          else
-            echo "File terrascan.tar.gz not found." >&2
-            exit 1
-          fi
+          tar -xzf terrascan.tar.gz -C /usr/local/bin
+          chmod +x /usr/local/bin/terrascan
+          rm terrascan.tar.gz  # Clean up
 
       - name: Run Terrascan for Terraform
         run: terrascan scan -t tf -p ./terraform
