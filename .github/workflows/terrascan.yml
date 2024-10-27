@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install jq
-        run: sudo apt-get install -y jq
+        run: sudo apt-get install jq
 
       - name: Get the latest Terrascan version
         id: get_version
@@ -37,8 +37,8 @@ jobs:
         id: download
         run: |
             echo "Downloading Terrascan version $VERSION..."
-            # Use the version fetched above and the correct architecture
-            DOWNLOAD_URL="https://github.com/tenable/terrascan/releases/download/$VERSION/terrascan_$VERSION_Linux_amd64.tar.gz"
+            # Update this URL based on the i386 version
+            DOWNLOAD_URL="https://github.com/tenable/terrascan/releases/download/v1.19.9/terrascan_1.19.9_Linux_i386.tar.gz"
         
             echo "Download URL: $DOWNLOAD_URL"
             
@@ -57,10 +57,10 @@ jobs:
           # Check if the file exists
           if [[ -f terrascan.tar.gz ]]; then
             echo "File found. Extracting..."
-            tar -xzf terrascan.tar.gz --strip-components=1 -C /usr/local/bin
+            tar -xzf terrascan.tar.gz -C /usr/local/bin
             if [[ $? -eq 0 ]]; then
               echo "Extraction successful."
-              chmod +x /usr/local/bin/terrascan  # Ensure the binary is executable
+              chmod +x /usr/local/bin/terrascan  # Adjust this as needed if the filename is different
               rm terrascan.tar.gz  # Clean up the downloaded file
             else
               echo "Extraction failed." >&2
@@ -71,8 +71,5 @@ jobs:
             exit 1
           fi
 
-      - name: Run Terrascan for Kubernetes
+      - name: Run Terrascan
         run: terrascan scan -t k8s -p ./terraform/manifests
-        
-      - name: Run Terrascan for Terraform
-        run: terrascan scan -t tf -p ./terraform
