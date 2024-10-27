@@ -68,14 +68,6 @@ jobs:
             echo "File terrascan.tar.gz not found." >&2
             exit 1
           fi
-
-      - name: Deploy to Kubernetes
-        env: 
-            KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
-        run: |
-            echo "$KUBE_CONFIG_DATA" | base64 --decode > ~/.kube/config
-            kubectl apply -f ./terraform/k8s  # Adjusted path to Kubernetes files
-
       - name: Run Terrascan for Kubernetes files
         run: terrascan scan -t k8s -p ./terraform  # Adjusted path to Kubernetes files
 
