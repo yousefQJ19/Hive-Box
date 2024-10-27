@@ -3,8 +3,8 @@ name: CD Pipeline
 on:
   push:
     branches:
-      - main  # Trigger CD only on changes to the main branch
-  workflow_dispatch:  # Allows manual triggers
+      - main  
+  workflow_dispatch:  
 
 jobs:
   deploy:
@@ -31,7 +31,7 @@ jobs:
           context: .
           push: true
           tags: your-docker-username/your-image-name:latest
-          # Set to match your Docker Hub or registry details
+         
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
