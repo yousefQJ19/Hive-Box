@@ -12,7 +12,6 @@ spec:
       labels:
         app: my-app
     spec:
-      containers:
         - name: my-app
           image: hive-box/1.0.0:latest 
           ports:
