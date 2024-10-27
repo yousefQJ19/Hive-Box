@@ -60,5 +60,9 @@ jobs:
 
     - name: Run pytest
       run: pytest integration_test.py
+      
+    - name: SonarQube Quality Gate Check
+      uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
+  
   
   
