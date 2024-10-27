@@ -36,31 +36,29 @@ jobs:
       - name: Download Terrascan
         id: download
         run: |
-            echo "Downloading Terrascan version $VERSION..."
-            # Update this URL based on the i386 version
-            DOWNLOAD_URL="https://github.com/tenable/terrascan/releases/download/v1.19.9/terrascan_1.19.9_Linux_i386.tar.gz"
+          echo "Downloading Terrascan version $VERSION..."
+          DOWNLOAD_URL="https://github.com/tenable/terrascan/releases/download/$VERSION/terrascan_$VERSION_Linux_i386.tar.gz"
         
-            echo "Download URL: $DOWNLOAD_URL"
-            
-            # Download the file with error handling
-            curl -L -f -o terrascan.tar.gz "$DOWNLOAD_URL"
+          echo "Download URL: $DOWNLOAD_URL"
+          
+          # Download the file with error handling
+          curl -L -f -o terrascan.tar.gz "$DOWNLOAD_URL"
         
-            # Check if the download was successful
-            if [ $? -ne 0 ]; then
-              echo "Download failed!" >&2
-              exit 1
-            fi
+          # Check if the download was successful
+          if [ $? -ne 0 ]; then
+            echo "Download failed!" >&2
+            exit 1
+          fi
 
       - name: Extract and Install Terrascan
         run: |
           echo "Extracting Terrascan..."
-          # Check if the file exists
           if [[ -f terrascan.tar.gz ]]; then
             echo "File found. Extracting..."
             tar -xzf terrascan.tar.gz -C /usr/local/bin
             if [[ $? -eq 0 ]]; then
               echo "Extraction successful."
-              chmod +x /usr/local/bin/terrascan  # Adjust this as needed if the filename is different
+              chmod +x /usr/local/bin/terrascan
               rm terrascan.tar.gz  # Clean up the downloaded file
             else
               echo "Extraction failed." >&2
@@ -71,5 +69,15 @@ jobs:
             exit 1
           fi
 
-      - name: Run Terrascan
+      - name: Run Terrascan for Kubernetes
         run: terrascan scan -t k8s -p ./terraform/manifests
+        
+  run-terrascan-terraform:
+    runs-on: ubuntu-latest
+    needs: build  # Ensure this runs after the build job
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run Terrascan for Terraform
+        run: terrascan scan -t tf -p ./terraform/
