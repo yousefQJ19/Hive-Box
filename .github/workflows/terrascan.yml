@@ -9,7 +9,7 @@ on:
       - main  # Change this to your main branch
 
 jobs:
-  build:
+  terrascan:
     runs-on: ubuntu-latest
 
     steps:
