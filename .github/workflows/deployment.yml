@@ -3,8 +3,8 @@ name: CD Pipeline
 on:
   push:
     branches:
-      - main  # Trigger CD only on changes to the main branch
-  workflow_dispatch:  # Allows manual triggers
+      - main  
+  workflow_dispatch:  
 
 jobs:
   deploy:
@@ -23,7 +23,7 @@ jobs:
         env:
           KUBECONFIG: ${{ secrets.KUBECONFIG }}
         run: |
-          echo "$KUBECONFIG" > ~/.kube/config
+          echo "$KUBECONFIG" > ~/../terraform/kubeconfig
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
@@ -38,13 +38,13 @@ jobs:
 
       - name: Deploy to Kubernetes
         run: |
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
+          kubectl apply -f ../terraform/manifests/deployment.yaml
+          kubectl apply -f ../terraform/manifests/service.yaml
         env:
-          KUBECONFIG: ~/.kube/config
+          KUBECONFIG: ~/../terraform//config
 
       - name: Confirm Deployment
         run: |
           kubectl rollout status deployment/your-deployment-name
         env:
-          KUBECONFIG: ~/.kube/config
+          KUBECONFIG: ~/../terraform/config
