@@ -24,16 +24,16 @@ def temperature() -> dict:
             f"https://api.opensensemap.org/boxes?date={date}&phenomenon={phenomenon}",
             timeout=1000
         )
-        res.raise_for_status()  # Raise an error for bad responses
+        res.raise_for_status()  
         all_boxes = res.json()
 
         c_count = 0
         c_total = 0.0
 
-        # Iterate through the boxes and gather temperature data
+        
         for box in all_boxes:
             for sensor in box.get("sensors", []):
-                if sensor.get("unit") == "°C":  # Ensure we only look at temperature sensors
+                if sensor.get("unit") == "°C": 
                     measurement = sensor.get("lastMeasurement")
                     if measurement and "value" in measurement:
                         try:
@@ -41,15 +41,15 @@ def temperature() -> dict:
                             c_total += temperature_value
                             c_count += 1
                         except (ValueError, TypeError):
-                            continue  # Ignore any invalid temperature values
+                            continue  
 
-        # Check if any temperature data was found
+        
         if c_count == 0:
             return {"message": "No temperature data found."}
 
         result['average'] = c_total / c_count
 
-        # Determine the status based on the average temperature
+        
         if result['average'] <= 10:
             result['status'] = "Too cold"
         elif 11 <= result['average'] <= 36:
