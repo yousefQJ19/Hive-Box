@@ -73,3 +73,6 @@ jobs:
 
       - name: Run Terrascan
         run: terrascan scan -t k8s -p ./terraform/manifests
+
+      - name: run terrascan for terraform files
+        run: terrascan scan -t k8s -p ./terraform
