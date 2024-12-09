@@ -1,4 +1,4 @@
-fastapi[standard]==0.115.2
+fastapi[standard]==0.115.6
 requests==2.32.3
 prometheus-fastapi-instrumentator==7.0.0 
 
